@@ -1,5 +1,3 @@
-import kotlin.math.max
-
 abstract class General {
 //    init {
 //        println("General $name has been created.")
@@ -58,6 +56,19 @@ object GeneralManager {
     fun getGeneralCount(): Int {
         return list.size
     }
+
+    fun createGenerals(lords: Int, nonLords: Int) {
+        val lordFactory = LordFactory()
+        val nonLordFactory = NonLordFactory()
+
+        for(i in 1..lords) {
+            addGeneral(lordFactory.createRandomGeneral())
+        }
+
+        for(i in 1..nonLords) {
+            addGeneral(nonLordFactory.createRandomGeneral())
+        }
+    }
 }
 
 abstract class GeneralFactory {
@@ -105,17 +116,17 @@ class NonLordFactory: GeneralFactory() {
 
 fun main() {
     GeneralManager
-    val lordFactory = LordFactory()
-    val nonLordFactory = NonLordFactory()
-
-    for(i in 1..3) {
-        GeneralManager.addGeneral(lordFactory.createRandomGeneral())
-    }
-
-    for(i in 1..3) {
-        GeneralManager.addGeneral(nonLordFactory.createRandomGeneral())
-    }
-
+//    val lordFactory = LordFactory()
+//    val nonLordFactory = NonLordFactory()
+//
+//    for(i in 1..3) {
+//        GeneralManager.addGeneral(lordFactory.createRandomGeneral())
+//    }
+//
+//    for(i in 1..3) {
+//        GeneralManager.addGeneral(nonLordFactory.createRandomGeneral())
+//    }
+    GeneralManager.createGenerals(3, 3)
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of generals: $size")
