@@ -8,29 +8,25 @@ interface Player {
         }
 
     fun beingAttacked() {
-        val flag = true
         println("$name is being attacked.")
-        if(flag) {
-            currentHP--
-            println("$name can't dodge the attack, current HP is $currentHP")
-        }
     }
 
     fun dodgeAttack() {
-        println("$name dodges the attack.")
+        currentHP--
+        println("$name can't dodges the attack, current HP is $currentHP")
     }
 }
 
 abstract class General: Player {
     override var currentHP: Int = 0
-}
 
+}
 
 object GeneralManager {
     init {
         println("Setting up the general manager.")
     }
-    private val list: MutableList<General> = mutableListOf()
+    private val list: MutableList<Player> = mutableListOf()
 
     fun addGeneral(general: General) {
         list.add(general)
@@ -59,25 +55,17 @@ object GeneralManager {
         }
     }
 
-    fun attackFirstGeneral() {
-        list[0].beingAttacked()
+    // equip a player with an equipment
+    fun equip(index: Int, equipment: (Player) -> Equipment): Player {
+        list[index] = equipment(list[index])
+        return list[index]
     }
+
 }
 
 abstract class GeneralFactory {
     abstract fun createRandomGeneral(): General
 
-//    fun createGeneral(name: String): General {
-//        val general =  when(name) {
-//            "Liu Bei" -> LiuBei()
-//            "Cao Cao" -> CaoCao()
-//            "Sun Quan" -> SunQuan()
-//            else -> throw IllegalArgumentException("Invalid general name.")
-//        }
-//        println("General ${general.name} created.")
-//        general.currentHP = general.maxHP
-//        return general
-//    }
 }
 
 class LordFactory: GeneralFactory() {
@@ -114,5 +102,6 @@ fun main() {
     val size = GeneralManager.getGeneralCount()
     println("Total number of generals: $size")
 
-    GeneralManager.attackFirstGeneral()
+    val armoredGeneral = GeneralManager.equip(0, ::EightTrigrams)
+    armoredGeneral.beingAttacked()
 }
