@@ -82,9 +82,14 @@ class LordFactory: GeneralFactory() {
     }
 }
 
+class GeneralAdapter(general: GuanYu): General() {
+    override val name: String = general.name
+    override var maxHP: Int = general.maxHP
+}
+
 class NonLordFactory: GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
-        ZhangFei(), GuanYu(), ZhaoYun(), XuChu(), ZhouYu()
+        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu()
     )
 
     override fun createRandomGeneral(): General {

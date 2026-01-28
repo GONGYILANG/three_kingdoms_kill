@@ -18,9 +18,9 @@ class ZhangFei: General() {
     override var maxHP = 4
 }
 
-class GuanYu: General() {
-    override val name = "Guan Yu"
-    override var maxHP = 4
+class GuanYu {
+    val name = "Guan Yu"
+    var maxHP = 4
 }
 
 class ZhaoYun: General() {
