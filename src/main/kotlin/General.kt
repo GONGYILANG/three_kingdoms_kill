@@ -1,41 +1,30 @@
-abstract class General {
-//    init {
-//        println("General $name has been created.")
-//    }
-    abstract val name: String
-    abstract var maxHP: Int
-    var currentHP: Int = 0
+interface Player {
+    val name: String
+    var maxHP: Int
+    var currentHP: Int
+        get() = 0
+        set(value) {
+            println("Setting current HP to $value")
+        }
+
+    fun beingAttacked() {
+        val flag = true
+        println("$name is being attacked.")
+        if(flag) {
+            currentHP--
+            println("$name can't dodge the attack, current HP is $currentHP")
+        }
+    }
+
+    fun dodgeAttack() {
+        println("$name dodges the attack.")
+    }
 }
 
-class LiuBei: General() {
-    override val name = "Liu Bei"
-    override var maxHP = 4
+abstract class General: Player {
+    override var currentHP: Int = 0
 }
 
-class CaoCao: General() {
-    override val name = "Cao Cao"
-    override var maxHP = 4
-}
-
-class SunQuan: General() {
-    override val name = "Sun Quan"
-    override var maxHP = 4
-}
-
-class ZhangFei: General() {
-    override val name = "Zhang Fei"
-    override var maxHP = 4
-}
-
-class GuanYu: General() {
-    override val name = "Guan Yu"
-    override var maxHP = 4
-}
-
-class ZhaoYun: General() {
-    override val name = "Zhao Yun"
-    override var maxHP = 4
-}
 
 object GeneralManager {
     init {
@@ -68,6 +57,10 @@ object GeneralManager {
         for(i in 1..nonLords) {
             addGeneral(nonLordFactory.createRandomGeneral())
         }
+    }
+
+    fun attackFirstGeneral() {
+        list[0].beingAttacked()
     }
 }
 
@@ -103,7 +96,7 @@ class LordFactory: GeneralFactory() {
 
 class NonLordFactory: GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
-        ZhangFei(), GuanYu(), ZhaoYun()
+        ZhangFei(), GuanYu(), ZhaoYun(), XuChu(), ZhouYu()
     )
 
     override fun createRandomGeneral(): General {
@@ -116,18 +109,10 @@ class NonLordFactory: GeneralFactory() {
 
 fun main() {
     GeneralManager
-//    val lordFactory = LordFactory()
-//    val nonLordFactory = NonLordFactory()
-//
-//    for(i in 1..3) {
-//        GeneralManager.addGeneral(lordFactory.createRandomGeneral())
-//    }
-//
-//    for(i in 1..3) {
-//        GeneralManager.addGeneral(nonLordFactory.createRandomGeneral())
-//    }
-    GeneralManager.createGenerals(3, 3)
+    GeneralManager.createGenerals(1, 2)
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of generals: $size")
+
+    GeneralManager.attackFirstGeneral()
 }
