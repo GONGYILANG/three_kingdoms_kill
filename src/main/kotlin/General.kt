@@ -6,6 +6,7 @@ interface Player {
         set(value) {
             println("Setting current HP to $value")
         }
+    var numOfCards: Int
 
     fun beingAttacked() {
         println("$name is being attacked.")
@@ -15,10 +16,42 @@ interface Player {
         currentHP--
         println("$name can't dodges the attack, current HP is $currentHP")
     }
+
+    fun templateMethod() {
+        preparationPhase()
+        if(judgementPhase()) {
+            drawPhase()
+            playPhase()
+            discardPhase()
+        }
+        finalPhase()
+    }
+
+    // component methods invoked at a player's turn
+    fun preparationPhase()
+    fun judgementPhase(): Boolean {
+        return true
+    }
+    fun drawPhase() {
+        numOfCards += 2
+        println("$name draws 2 cards and now has $numOfCards card(s).")
+    }
+    fun playPhase() {
+        println("$name has $numOfCards card(s), current HP is $currentHP.")
+    }
+    fun discardPhase() {
+        val l = listOf(1, 2, 3)
+        val numOfDiscard = l.random()
+        numOfCards -= numOfDiscard
+            println("$name discards $numOfDiscard card(s), now has $numOfCards card(s).")
+
+    }
+    fun finalPhase()
 }
 
 abstract class General: Player {
     override var currentHP: Int = 0
+    override var numOfCards: Int = 4
 
 }
 
@@ -61,6 +94,12 @@ object GeneralManager {
         return list[index]
     }
 
+    fun gameStart() {
+        for (p in list) {
+            p.templateMethod()
+        }
+    }
+
 }
 
 abstract class GeneralFactory {
@@ -78,6 +117,7 @@ class LordFactory: GeneralFactory() {
         listOfGenerals.remove(lordGeneral)
         lordGeneral.maxHP++
         lordGeneral.currentHP = lordGeneral.maxHP
+        println("General ${lordGeneral.name} created.")
         return lordGeneral
     }
 }
@@ -85,6 +125,12 @@ class LordFactory: GeneralFactory() {
 class GeneralAdapter(general: GuanYu): General() {
     override val name: String = general.name
     override var maxHP: Int = general.maxHP
+
+    override fun preparationPhase() {
+    }
+
+    override fun finalPhase() {
+    }
 }
 
 class NonLordFactory: GeneralFactory() {
@@ -96,16 +142,18 @@ class NonLordFactory: GeneralFactory() {
         val nonLordGeneral = listOfGenerals.random()
         listOfGenerals.remove(nonLordGeneral)
         nonLordGeneral.currentHP = nonLordGeneral.maxHP
+        println("General ${nonLordGeneral.name} created.")
         return nonLordGeneral
     }
 }
 
 fun main() {
     GeneralManager
-    GeneralManager.createGenerals(1, 2)
+    GeneralManager.createGenerals(1, 3)
 
     val size = GeneralManager.getGeneralCount()
-    println("Total number of generals: $size")
+    println("Total number of players: $size")
+    GeneralManager.gameStart()
 
     val armoredGeneral = GeneralManager.equip(0, ::EightTrigrams)
     armoredGeneral.beingAttacked()
