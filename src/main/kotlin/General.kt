@@ -142,7 +142,7 @@ class GeneralAdapter(general: GuanYu): General() {
 
 class NonLordFactory: GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
-        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu()
+        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan()
     )
 
     override fun createRandomGeneral(): General {

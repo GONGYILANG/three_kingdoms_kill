@@ -83,6 +83,29 @@ class ZhouYu: General() {
 
     }
 
+    override fun drawPhase() {
+        numOfCards += 3
+        println("[Heroism] $name draws 3 cards and now has $numOfCards card(s).")
+    }
+
+    override fun finalPhase() {
+
+    }
+}
+
+class DiaoChan: General() {
+    override val name = "Diao Chan"
+    override var maxHP = 3
+    override fun preparationPhase() {
+
+    }
+
+    override fun discardPhase() {
+        super.discardPhase()
+        numOfCards += 1
+        println("[Beauty Outshining the Moon] $name now has $numOfCards card(s).")
+    }
+
     override fun finalPhase() {
 
     }
