@@ -7,6 +7,8 @@ interface Player {
             println("Setting current HP to $value")
         }
     var numOfCards: Int
+    var flag: Boolean  // a boolean variable used in the judgement phase,
+    // if flag is true then skip the play phase in a round, otherwise proceed the play phase
 
     fun beingAttacked() {
         println("$name is being attacked.")
@@ -19,18 +21,18 @@ interface Player {
 
     fun templateMethod() {
         preparationPhase()
+        drawPhase()
         if(judgementPhase()) {
-            drawPhase()
             playPhase()
-            discardPhase()
         }
+        discardPhase()
         finalPhase()
     }
 
     // component methods invoked at a player's turn
     fun preparationPhase()
     fun judgementPhase(): Boolean {
-        return true
+        return flag
     }
     fun drawPhase() {
         numOfCards += 2
@@ -52,6 +54,7 @@ interface Player {
 abstract class General: Player {
     override var currentHP: Int = 0
     override var numOfCards: Int = 4
+    override var flag: Boolean = true
 
 }
 
@@ -95,8 +98,12 @@ object GeneralManager {
     }
 
     fun gameStart() {
-        for (p in list) {
-            p.templateMethod()
+        println("\n${list[3].name} being placed the Acedia card.")
+        for (i in 0 until list.size) {
+            if(i == 3)
+                // Place the Acedia spell card to the fourth player
+                Acedia(list[i]).execute()
+            list[i].templateMethod()
         }
     }
 
