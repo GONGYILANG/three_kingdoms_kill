@@ -18,16 +18,20 @@ interface Player {
     }
 
     fun hasDodgeCard(): Boolean {
-        val r = Random(System.currentTimeMillis())
         var b = true
-        if(r.nextDouble() >= 0.85.pow(numOfCards))
+        // each card has a chance of 15% being a dodge card,
+        // so the probability of having no dodge card is (1-0.15)^numOfCard
+        if(Random.nextDouble() < 0.85.pow(numOfCards))
             b = false
         return b
     }
 
     fun dodgeAttack() {
         if(hasDodgeCard()) {
+            // consume one dodge card to dodge the attack
+            numOfCards--
             println("$name dodged attack by spending a dodge card.")
+            println("$name has $numOfCards of card(s) after dodging the attack.")
         }
         else {
             currentHP--
@@ -166,9 +170,15 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
         ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan(), SimaYi()
     )
 
+    // a method to add another Wei general to the Wei chain started with the weiGeneral field
     fun addWeiGeneral(newWeiGeneral: WeiGeneral) {
-        weiGeneral?.next = newWeiGeneral
-        println("${newWeiGeneral.name} added to the Wei chain.")
+        if(weiGeneral?.next == null) {
+            weiGeneral?.next = newWeiGeneral
+            println("${newWeiGeneral.name} added to the Wei chain.")
+        }
+        else {
+            NonLordFactory(weiGeneral!!.next).addWeiGeneral(newWeiGeneral)
+        }
     }
 
     override fun createRandomGeneral(): General {
@@ -194,8 +204,14 @@ fun main() {
     println("General ${g2.name} created.")
     GeneralManager.addGeneral(g2)
 
+    val g3 = ZhenJi()
+    g3.currentHP = g3.maxHP
+    println("General ${g3.name} created.")
+    GeneralManager.addGeneral(g3)
+
     val factory = NonLordFactory(g1)
     factory.addWeiGeneral(g2)
+    factory.addWeiGeneral(g3)
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of players: $size")
