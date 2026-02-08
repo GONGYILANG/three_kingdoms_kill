@@ -1,3 +1,6 @@
+import kotlin.math.pow
+import kotlin.random.Random
+
 interface Player {
     val name: String
     var maxHP: Int
@@ -14,9 +17,22 @@ interface Player {
         println("$name is being attacked.")
     }
 
+    fun hasDodgeCard(): Boolean {
+        val r = Random(System.currentTimeMillis())
+        var b = true
+        if(r.nextDouble() >= 0.85.pow(numOfCards))
+            b = false
+        return b
+    }
+
     fun dodgeAttack() {
-        currentHP--
-        println("$name can't dodges the attack, current HP is $currentHP")
+        if(hasDodgeCard()) {
+            println("$name dodged attack by spending a dodge card.")
+        }
+        else {
+            currentHP--
+            println("$name can't dodges the attack, current HP is $currentHP")
+        }
     }
 
     fun templateMethod() {
@@ -80,7 +96,7 @@ object GeneralManager {
 
     fun createGenerals(lords: Int, nonLords: Int) {
         val lordFactory = LordFactory()
-        val nonLordFactory = NonLordFactory()
+        val nonLordFactory = NonLordFactory(null)
 
         for(i in 1..lords) {
             addGeneral(lordFactory.createRandomGeneral())
@@ -105,6 +121,11 @@ object GeneralManager {
                 Acedia(list[i]).execute()
             list[i].templateMethod()
         }
+
+        // testing the dodge card on general Cao Cao, who is the first general in the list
+        println()
+        list[0].beingAttacked()
+        (list[0] as WeiGeneral).handleRequest()
     }
 
 }
@@ -140,10 +161,15 @@ class GeneralAdapter(general: GuanYu): General() {
     }
 }
 
-class NonLordFactory: GeneralFactory() {
+class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
-        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan()
+        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan(), SimaYi()
     )
+
+    fun addWeiGeneral(newWeiGeneral: WeiGeneral) {
+        weiGeneral?.next = newWeiGeneral
+        println("${newWeiGeneral.name} added to the Wei chain.")
+    }
 
     override fun createRandomGeneral(): General {
         val nonLordGeneral = listOfGenerals.random()
@@ -156,12 +182,26 @@ class NonLordFactory: GeneralFactory() {
 
 fun main() {
     GeneralManager
-    GeneralManager.createGenerals(1, 3)
+    val g1 = CaoCao()
+    g1.currentHP = g1.maxHP + 1
+    println("General ${g1.name} created.")
+    GeneralManager.addGeneral(g1)
+
+    GeneralManager.createGenerals(0, 2)
+
+    val g2 = SimaYi()
+    g2.currentHP = g2.maxHP
+    println("General ${g2.name} created.")
+    GeneralManager.addGeneral(g2)
+
+    val factory = NonLordFactory(g1)
+    factory.addWeiGeneral(g2)
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of players: $size")
     GeneralManager.gameStart()
 
-    val armoredGeneral = GeneralManager.equip(0, ::EightTrigrams)
-    armoredGeneral.beingAttacked()
+//    println()
+//    val armoredGeneral = GeneralManager.equip(0, ::EightTrigrams)
+//    armoredGeneral.beingAttacked()
 }

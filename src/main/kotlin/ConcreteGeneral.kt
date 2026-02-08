@@ -11,18 +11,6 @@ class LiuBei: General() {
 
 }
 
-class CaoCao: General() {
-    override val name = "Cao Cao"
-    override var maxHP = 4
-    override fun preparationPhase() {
-
-    }
-
-    override fun finalPhase() {
-
-    }
-}
-
 class SunQuan: General() {
     override val name = "Sun Quan"
     override var maxHP = 4
