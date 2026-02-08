@@ -3,6 +3,22 @@ import kotlin.random.Random
 abstract class WeiGeneral: General() {
     abstract var next: WeiGeneral?
     abstract fun handleRequest(): Boolean
+
+    protected fun handleNextRequest(): Boolean {
+        var result: Boolean = false
+        if(next != null) {
+            if(next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
+                next!!.numOfCards--
+                println("${next!!.name} helps Cao Cao dodged an attack by spending a dodge card.")
+                println("${next!!.name} now has ${next!!.numOfCards} cards left after dodging the attack for Cao Cao.")
+                result = true
+            }
+            else {
+                result = next!!.handleRequest()
+            }
+        }
+        return result
+    }
 }
 
 class CaoCao: WeiGeneral() {
@@ -20,18 +36,7 @@ class CaoCao: WeiGeneral() {
 
     override fun handleRequest(): Boolean {
         println("[Entourage] $name activates Lord Skill Entourage.")
-        var result: Boolean = false  // the result of whether another Wei general dodged the attack for Cao Cao
-        if(next != null) {
-            if(next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
-                next!!.numOfCards--
-                println("${next!!.name} helps Cao Cao dodged an attack by spending a dodge card.")
-                println("${next!!.name} now has ${next!!.numOfCards} cards left after dodging the attack for Cao Cao.")
-                result = true
-            }
-            else {
-                result = next!!.handleRequest()
-            }
-        }
+        val result = handleNextRequest()  // whether another Wei general dodged the attack for Cao Cao
         // if all Wei generals in the Wei chain failed to dodge the attack, Cao Cao dodges it by himself
         if(!result)
             dodgeAttack()
@@ -53,19 +58,7 @@ class SimaYi: WeiGeneral() {
     }
 
     override fun handleRequest(): Boolean {
-        var result: Boolean = false
-        if(next != null) {
-            if(next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
-                next!!.numOfCards--
-                println("${next!!.name} helps Cao Cao dodged an attack by spending a dodge card.")
-                println("${next!!.name} now has ${next!!.numOfCards} cards left after dodging the attack for Cao Cao.")
-                result = true
-            }
-            else {
-                result = next!!.handleRequest()
-            }
-        }
-        return result
+        return handleNextRequest()
     }
 }
 
@@ -83,18 +76,6 @@ class ZhenJi: WeiGeneral() {
     }
 
     override fun handleRequest(): Boolean {
-        var result: Boolean = false
-        if(next != null) {
-            if(next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
-                next!!.numOfCards--
-                println("${next!!.name} helps Cao Cao dodged an attack by spending a dodge card.")
-                println("${next!!.name} now has ${next!!.numOfCards} cards left after dodging the attack for Cao Cao.")
-                result = true
-            }
-            else {
-                result = next!!.handleRequest()
-            }
-        }
-        return result
+        return handleNextRequest()
     }
 }
