@@ -79,3 +79,39 @@ class ZhenJi: WeiGeneral() {
         return handleNextRequest()
     }
 }
+
+class XiahouDun: WeiGeneral() {
+    override val name = "Xiahou Dun"
+    override var maxHP = 4
+    override var next: WeiGeneral? = null
+
+    override fun preparationPhase() {
+
+    }
+
+    override fun finalPhase() {
+
+    }
+
+    override fun handleRequest(): Boolean {
+        return handleNextRequest()
+    }
+}
+
+class GuoJia: WeiGeneral() {
+    override val name = "Guo Jia"
+    override var maxHP = 4
+    override var next: WeiGeneral? = null
+
+    override fun preparationPhase() {
+
+    }
+
+    override fun finalPhase() {
+
+    }
+
+    override fun handleRequest(): Boolean {
+        return handleNextRequest()
+    }
+}

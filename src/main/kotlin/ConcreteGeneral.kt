@@ -40,6 +40,17 @@ class GuanYu {
     var maxHP = 4
 }
 
+class GeneralAdapter(general: GuanYu): General() {
+    override val name: String = general.name
+    override var maxHP: Int = general.maxHP
+
+    override fun preparationPhase() {
+    }
+
+    override fun finalPhase() {
+    }
+}
+
 class ZhaoYun: General() {
     override val name = "Zhao Yun"
     override var maxHP = 4

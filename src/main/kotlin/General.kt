@@ -154,31 +154,22 @@ class LordFactory: GeneralFactory() {
     }
 }
 
-class GeneralAdapter(general: GuanYu): General() {
-    override val name: String = general.name
-    override var maxHP: Int = general.maxHP
-
-    override fun preparationPhase() {
-    }
-
-    override fun finalPhase() {
-    }
-}
-
 class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
         ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan(), SimaYi()
     )
 
     // a method to add another Wei general to the Wei chain started with the weiGeneral field
-    fun addWeiGeneral(newWeiGeneral: WeiGeneral) {
-        if(weiGeneral?.next == null) {
-            weiGeneral?.next = newWeiGeneral
-            println("${newWeiGeneral.name} added to the Wei chain.")
+    fun addToWeiChain(newWeiGeneral: WeiGeneral) {
+        if(weiGeneral == null) return
+
+        while(weiGeneral?.next != null
+            && weiGeneral!!.next!!.javaClass !== newWeiGeneral.javaClass) {
+            weiGeneral = weiGeneral!!.next
         }
-        else {
-            NonLordFactory(weiGeneral!!.next).addWeiGeneral(newWeiGeneral)
-        }
+        weiGeneral?.next = newWeiGeneral
+        println("${newWeiGeneral.name} added to the Wei chain.")
+
     }
 
     override fun createRandomGeneral(): General {
@@ -209,9 +200,15 @@ fun main() {
     println("General ${g3.name} created.")
     GeneralManager.addGeneral(g3)
 
+    val g4 = XiahouDun()
+    g4.currentHP = g4.maxHP
+    println("General ${g4.name} created.")
+    GeneralManager.addGeneral(g4)
+
     val factory = NonLordFactory(g1)
-    factory.addWeiGeneral(g2)
-    factory.addWeiGeneral(g3)
+    factory.addToWeiChain(g2)
+    factory.addToWeiChain(g3)
+    factory.addToWeiChain(g4)
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of players: $size")
