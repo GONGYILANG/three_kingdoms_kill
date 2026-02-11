@@ -11,10 +11,11 @@ interface Player {
         }
     var numOfCards: Int
     var flag: Boolean  // a boolean variable used in the judgement phase,
-    // if flag is true then skip the play phase in a round, otherwise proceed the play phase
+    // if flag is true then skip the play phase for one round, otherwise the play phase proceeds
 
     fun beingAttacked() {
         println("$name is being attacked.")
+        dodgeAttack()
     }
 
     fun hasDodgeCard(): Boolean {
@@ -118,7 +119,7 @@ object GeneralManager {
     }
 
     fun gameStart() {
-        println("\n${list[3].name} being placed the Acedia card.")
+        println("${list[3].name} being placed the Acedia card.")
         for (i in 0 until list.size) {
             if(i == 3)
                 // Place the Acedia spell card to the fourth player
@@ -128,8 +129,10 @@ object GeneralManager {
 
         // testing the dodge card on general Cao Cao, who is the first general in the list
         println()
+        equip(0, ::EightTrigrams)
         list[0].beingAttacked()
-        (list[0] as WeiGeneral).handleRequest()
+
+        //list.forEach { it.beingAttacked() }
     }
 
 }
@@ -156,7 +159,7 @@ class LordFactory: GeneralFactory() {
 
 class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
-        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan(), SimaYi()
+        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan()
     )
 
     // a method to add another Wei general to the Wei chain started with the weiGeneral field
@@ -211,10 +214,7 @@ fun main() {
     factory.addToWeiChain(g4)
 
     val size = GeneralManager.getGeneralCount()
-    println("Total number of players: $size")
+    println("Total number of players: $size\n")
     GeneralManager.gameStart()
 
-//    println()
-//    val armoredGeneral = GeneralManager.equip(0, ::EightTrigrams)
-//    armoredGeneral.beingAttacked()
 }

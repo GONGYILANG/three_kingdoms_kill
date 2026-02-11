@@ -19,6 +19,14 @@ abstract class WeiGeneral: General() {
         }
         return result
     }
+
+    override fun beingAttacked() {
+        println("$name is being attacked.")
+        if(this is CaoCao)
+            handleRequest()
+        else
+            dodgeAttack()
+    }
 }
 
 class CaoCao: WeiGeneral() {
