@@ -12,6 +12,7 @@ interface Player {
     var numOfCards: Int
     var flag: Boolean  // a boolean variable used in the judgement phase,
     // if flag is true then skip the play phase for one round, otherwise the play phase proceeds
+    var identity: Strategy
 
     fun beingAttacked() {
         println("$name is being attacked.")
@@ -40,6 +41,14 @@ interface Player {
         }
     }
 
+    fun hasAttackCard(): Boolean {
+        var b = true
+        if(Random.nextDouble() < 0.8.pow(numOfCards)) {
+            b = false
+        }
+        return b
+    }
+
     fun templateMethod() {
         preparationPhase()
         drawPhase()
@@ -60,13 +69,25 @@ interface Player {
         println("$name draws 2 cards and now has $numOfCards card(s).")
     }
     fun playPhase() {
+        if(hasAttackCard()) {
+            val enemy: Player = identity.whomToAttack(GeneralManager.getGeneralList())
+            println("$name spends a card to attack a ${enemy.identity}, ${enemy.name}")
+            enemy.beingAttacked()
+            numOfCards--
+        }
         println("$name has $numOfCards card(s), current HP is $currentHP.")
+        if(currentHP == 0) {
+            GeneralManager.removeGeneral(this as General)
+        }
     }
     fun discardPhase() {
         val l = listOf(1, 2, 3)
         val numOfDiscard = l.random()
-        numOfCards -= numOfDiscard
-            println("$name discards $numOfDiscard card(s), now has $numOfCards card(s).")
+        if(numOfDiscard > numOfCards)
+            numOfCards = 0
+        else
+            numOfCards -= numOfDiscard
+        println("$name discards $numOfDiscard card(s), now has $numOfCards card(s).")
 
     }
     fun finalPhase()
@@ -99,14 +120,17 @@ object GeneralManager {
         return list.size
     }
 
+    fun getGeneralList(): List<Player> {
+        return list.toList()
+    }
+
     fun createGenerals(lords: Int, nonLords: Int) {
         val lordFactory = LordFactory()
-        val nonLordFactory = NonLordFactory(null)
-
         for(i in 1..lords) {
             addGeneral(lordFactory.createRandomGeneral())
         }
 
+        val nonLordFactory = NonLordFactory(list[0] as? WeiGeneral, lords+nonLords)
         for(i in 1..nonLords) {
             addGeneral(nonLordFactory.createRandomGeneral())
         }
@@ -131,8 +155,6 @@ object GeneralManager {
         println()
         equip(0, ::EightTrigrams)
         list[0].beingAttacked()
-
-        //list.forEach { it.beingAttacked() }
     }
 
 }
@@ -144,23 +166,42 @@ abstract class GeneralFactory {
 
 class LordFactory: GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(  // a list of generals not created yet
-        LiuBei(), CaoCao(), SunQuan()
+        CaoCao(), LiuBei(), SunQuan()
     )
 
     override fun createRandomGeneral(): General {
+        // initialize a random lord general
         val lordGeneral = listOfGenerals.random()
         listOfGenerals.remove(lordGeneral)
         lordGeneral.maxHP++
         lordGeneral.currentHP = lordGeneral.maxHP
+        lordGeneral.identity = LordStrategy()
+
         println("General ${lordGeneral.name} created.")
+        println("${lordGeneral.name}, a lord, has ${lordGeneral.currentHP} health point(s).")
         return lordGeneral
     }
 }
 
-class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
+class NonLordFactory(private var weiGeneral: WeiGeneral?, numOfParticipants: Int): GeneralFactory() {
     private val listOfGenerals: MutableList<General> = mutableListOf(
-        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan()
+        ZhangFei(), GeneralAdapter(GuanYu()), ZhaoYun(), XuChu(), ZhouYu(), DiaoChan(),
+        SimaYi(), ZhenJi(), XiahouDun(), GuoJia()
     )
+
+    private val identityList: List<Int> = when(numOfParticipants) {
+        4 -> listOf(1, 1, 1)
+        5 -> listOf(1, 2, 1)
+        6 -> listOf(1, 3, 1)
+        7 -> listOf(2, 3, 1)
+        8 -> listOf(2, 3, 2)
+        9 -> listOf(3, 4, 1)
+        10 -> listOf(3, 4, 2)
+        else -> throw RuntimeException("Invalid number of participants!")
+    }
+    private var numOfLoyalists = identityList[0]
+    private var numOfRebels = identityList[1]
+    private var numOfSpies = identityList[2]
 
     // a method to add another Wei general to the Wei chain started with the weiGeneral field
     fun addToWeiChain(newWeiGeneral: WeiGeneral) {
@@ -179,6 +220,21 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
         val nonLordGeneral = listOfGenerals.random()
         listOfGenerals.remove(nonLordGeneral)
         nonLordGeneral.currentHP = nonLordGeneral.maxHP
+        if(numOfLoyalists > 0) {
+            nonLordGeneral.identity = LoyalistStrategy()
+            numOfLoyalists--
+        } else if(numOfRebels > 0) {
+            nonLordGeneral.identity = RebelStrategy()
+            numOfRebels--
+        } else if(numOfSpies > 0) {
+            nonLordGeneral.identity = SpyStrategy()
+            numOfSpies--
+        } else {
+            throw RuntimeException("Failed to create more generals.")
+        }
+
+        println("${nonLordGeneral.name}, a ${nonLordGeneral.identity}, " +
+                "has ${nonLordGeneral.currentHP} health point(s).")
         println("General ${nonLordGeneral.name} created.")
         return nonLordGeneral
     }
@@ -186,32 +242,15 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?): GeneralFactory() {
 
 fun main() {
     GeneralManager
-    val g1 = CaoCao()
-    g1.currentHP = g1.maxHP + 1
-    println("General ${g1.name} created.")
-    GeneralManager.addGeneral(g1)
-
-    GeneralManager.createGenerals(0, 2)
-
-    val g2 = SimaYi()
-    g2.currentHP = g2.maxHP
-    println("General ${g2.name} created.")
-    GeneralManager.addGeneral(g2)
-
-    val g3 = ZhenJi()
-    g3.currentHP = g3.maxHP
-    println("General ${g3.name} created.")
-    GeneralManager.addGeneral(g3)
-
-    val g4 = XiahouDun()
-    g4.currentHP = g4.maxHP
-    println("General ${g4.name} created.")
-    GeneralManager.addGeneral(g4)
-
-    val factory = NonLordFactory(g1)
-    factory.addToWeiChain(g2)
-    factory.addToWeiChain(g3)
-    factory.addToWeiChain(g4)
+    GeneralManager.createGenerals(1, 5)
+    val listOfGen: List<Player> = GeneralManager.getGeneralList()
+    if(listOfGen[0] is WeiGeneral) {
+        val factory = NonLordFactory(listOfGen[0] as WeiGeneral, 6)
+        for (i in 1 until listOfGen.size) {
+            if (listOfGen[i] is WeiGeneral)
+                factory.addToWeiChain(listOfGen[i] as WeiGeneral)
+        }
+    }
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of players: $size\n")

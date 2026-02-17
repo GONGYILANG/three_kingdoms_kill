@@ -1,6 +1,7 @@
 class LiuBei: General() {
     override val name = "Liu Bei"
     override var maxHP = 4
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }
@@ -14,6 +15,7 @@ class LiuBei: General() {
 class SunQuan: General() {
     override val name = "Sun Quan"
     override var maxHP = 4
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }
@@ -26,6 +28,7 @@ class SunQuan: General() {
 class ZhangFei: General() {
     override val name = "Zhang Fei"
     override var maxHP = 4
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }
@@ -43,6 +46,7 @@ class GuanYu {
 class GeneralAdapter(general: GuanYu): General() {
     override val name: String = general.name
     override var maxHP: Int = general.maxHP
+    override lateinit var identity: Strategy
 
     override fun preparationPhase() {
     }
@@ -54,6 +58,7 @@ class GeneralAdapter(general: GuanYu): General() {
 class ZhaoYun: General() {
     override val name = "Zhao Yun"
     override var maxHP = 4
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }
@@ -66,6 +71,7 @@ class ZhaoYun: General() {
 class XuChu: General() {
     override val name = "Xu Chu"
     override var maxHP = 4
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }
@@ -78,6 +84,7 @@ class XuChu: General() {
 class ZhouYu: General() {
     override val name = "Zhou Yu"
     override var maxHP = 3
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }
@@ -95,6 +102,7 @@ class ZhouYu: General() {
 class DiaoChan: General() {
     override val name = "Diao Chan"
     override var maxHP = 3
+    override lateinit var identity: Strategy
     override fun preparationPhase() {
 
     }

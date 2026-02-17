@@ -7,7 +7,7 @@ abstract class WeiGeneral: General() {
     protected fun handleNextRequest(): Boolean {
         var result: Boolean = false
         if(next != null) {
-            if(next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
+            if(next!!.currentHP > 0 && next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
                 next!!.numOfCards--
                 println("${next!!.name} helps Cao Cao dodged an attack by spending a dodge card.")
                 println("${next!!.name} now has ${next!!.numOfCards} cards left after dodging the attack for Cao Cao.")
@@ -33,6 +33,7 @@ class CaoCao: WeiGeneral() {
     override val name = "Cao Cao"
     override var maxHP = 4
     override var next: WeiGeneral? = null
+    override lateinit var identity: Strategy
 
     override fun preparationPhase() {
 
@@ -56,6 +57,7 @@ class SimaYi: WeiGeneral() {
     override val name = "Sima Yi"
     override var maxHP = 3
     override var next: WeiGeneral? = null
+    override lateinit var identity: Strategy
 
     override fun preparationPhase() {
 
@@ -74,6 +76,7 @@ class ZhenJi: WeiGeneral() {
     override val name = "Zhen Ji"
     override var maxHP = 3
     override var next: WeiGeneral? = null
+    override lateinit var identity: Strategy
 
     override fun preparationPhase() {
 
@@ -92,6 +95,7 @@ class XiahouDun: WeiGeneral() {
     override val name = "Xiahou Dun"
     override var maxHP = 4
     override var next: WeiGeneral? = null
+    override lateinit var identity: Strategy
 
     override fun preparationPhase() {
 
@@ -110,6 +114,7 @@ class GuoJia: WeiGeneral() {
     override val name = "Guo Jia"
     override var maxHP = 4
     override var next: WeiGeneral? = null
+    override lateinit var identity: Strategy
 
     override fun preparationPhase() {
 
