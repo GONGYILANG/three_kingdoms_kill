@@ -85,9 +85,11 @@ class SpyStrategy: Strategy(), Observer {
         // if a lord handled an attack successfully(without losing HP),
         // the result is true; false otherwise
         if(result)
-            risk *= 1.5
-        else
+            // if the lord dodge the attack, the risk level decreases to 0.5 of the original value
             risk *= 0.5
+        else
+            // if the lord can't dodge the attack, the risk level increases to 1.5 of the original value
+            risk *= 1.5
         println("$ownerName on Lord's Risk Level: $risk")
     }
 
