@@ -184,10 +184,10 @@ object GeneralManager {
             list[i].templateMethod()
         }
 
-        // testing the dodge card on general Cao Cao, who is the first general in the list
-        println()
-        equip(0, ::EightTrigrams)
-        list[0].beingAttacked()
+        // testing the Eight Trigrams card on the first general in the general list
+//        println()
+//        equip(0, ::EightTrigrams)
+//        list[0].beingAttacked()
     }
 
 }
@@ -263,10 +263,12 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?, numOfParticipants: Int
             nonLordGeneral.identity = RebelStrategy()
             numOfRebels--
         } else if(numOfSpies > 0) {
-            nonLordGeneral.identity = SpyStrategy()
+            val spyStrategy = SpyStrategy()
+            spyStrategy.bindOwnerName(nonLordGeneral.name)
+            nonLordGeneral.identity = spyStrategy
             numOfSpies--
             // Let every spy become an observer to the lord
-            subject.attachObserver(nonLordGeneral.identity as Observer)
+            subject.attachObserver(spyStrategy)
         } else {
             throw RuntimeException("Failed to create more generals.")
         }

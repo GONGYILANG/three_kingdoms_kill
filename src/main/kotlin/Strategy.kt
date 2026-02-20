@@ -64,8 +64,11 @@ class LoyalistStrategy: Strategy() {
 
 class SpyStrategy: Strategy(), Observer {
     private var risk: Double = 50.0
+    private var ownerName: String = "Spy"
 
-    fun getRisk(): Double = risk
+    fun bindOwnerName(name: String) {
+        ownerName = name
+    }
 
     override fun whomToAttack(listOfPlayers: List<Player>): Player {
         lateinit var player: Player
@@ -85,7 +88,7 @@ class SpyStrategy: Strategy(), Observer {
             risk *= 1.5
         else
             risk *= 0.5
-        println("Spy on Lord's Risk Level: $risk")
+        println("$ownerName on Lord's Risk Level: $risk")
     }
 
     override fun toString(): String {
