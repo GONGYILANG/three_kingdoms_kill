@@ -5,7 +5,7 @@ abstract class WeiGeneral: General() {
     abstract fun handleRequest(): Boolean
 
     protected fun handleNextRequest(): Boolean {
-        var result: Boolean = false
+        var result = false
         if(next != null) {
             if(next!!.currentHP > 0 && next!!.hasDodgeCard() && Random.nextDouble() >= 0.5) {
                 next!!.numOfCards--
@@ -20,9 +20,9 @@ abstract class WeiGeneral: General() {
         return result
     }
 
-    override fun beingAttacked() {
+    override fun beingAttacked(): Boolean {
         println("$name is being attacked.")
-        if(this is CaoCao)
+        return if(this is CaoCao)
             handleRequest()
         else
             dodgeAttack()
@@ -47,9 +47,10 @@ class CaoCao: WeiGeneral() {
         println("[Entourage] $name activates Lord Skill Entourage.")
         val result = handleNextRequest()  // whether another Wei general dodged the attack for Cao Cao
         // if all Wei generals in the Wei chain failed to dodge the attack, Cao Cao dodges it by himself
+        var dodgeResult = false
         if(!result)
-            dodgeAttack()
-        return false
+            dodgeResult = dodgeAttack()
+        return result || dodgeResult
     }
 }
 

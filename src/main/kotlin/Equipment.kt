@@ -9,15 +9,16 @@ abstract class Equipment(protected val player: Player): Player by player {
         }
     }
 
-    override fun beingAttacked() {
+    override fun beingAttacked(): Boolean {
         println("$name is being attacked.")
-        dodgeAttack()
+        return dodgeAttack()
     }
 }
 
 class EightTrigrams(player: Player): Equipment(player) {
-    override fun dodgeAttack() {
+    override fun dodgeAttack(): Boolean {
         println("Triggering the Eight Trigrams")
+        var b = true
         if(Random.nextDouble() >= 0.5) {
             println("Judgement is true")
             println("$name dodged the attack with the eight trigrams, current HP is $currentHP")
@@ -25,9 +26,10 @@ class EightTrigrams(player: Player): Equipment(player) {
         else {
             println("Judgement is false")
             if(player is WeiGeneral)
-                player.handleRequest()
+                b = player.handleRequest()
             else
-                player.dodgeAttack()
+                b = player.dodgeAttack()
         }
+        return b
     }
 }

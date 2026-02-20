@@ -1,3 +1,4 @@
+import GeneralManager.list
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -14,11 +15,21 @@ interface Player {
     // if flag is true then skip the play phase for one round, otherwise the play phase proceeds
     var identity: Strategy
 
-    fun beingAttacked() {
+    /**
+     * Procedure of a player being attacked by another player.
+     * @return true means the attack was handled successfully and didn't harm
+     * player's currentHP, false otherwise.
+     */
+    fun beingAttacked(): Boolean {
         println("$name is being attacked.")
-        dodgeAttack()
+        return dodgeAttack()
     }
 
+    /**
+     * Judging if a player has at least one dodge card, which can offset an ongoing attack.
+     * Each hand card of a player has a chance of 15% being a dodge card.
+     * @return true means the player has at least one dodge card, false otherwise.
+     */
     fun hasDodgeCard(): Boolean {
         var b = true
         // each card has a chance of 15% being a dodge card,
@@ -28,7 +39,13 @@ interface Player {
         return b
     }
 
-    fun dodgeAttack() {
+    /**
+     * Procedure of dodging an ongoing attack.
+     * @return true means the attack was dodged successfully, false otherwise.
+     */
+    fun dodgeAttack(): Boolean {
+        // returning true means the attack is dodged, false means otherwise
+        var result = true
         if(hasDodgeCard()) {
             // consume one dodge card to dodge the attack
             numOfCards--
@@ -38,9 +55,16 @@ interface Player {
         else {
             currentHP--
             println("$name can't dodges the attack, current HP is $currentHP")
+            result = false
         }
+        return result
     }
 
+    /**
+     * Judging if a player has at least one attack card, which can launch an attack.
+     * Each hand card of a player has a chance of 20% being an attack card.
+     * @return true means the player has at least one attack card, false otherwise.
+     */
     fun hasAttackCard(): Boolean {
         var b = true
         if(Random.nextDouble() < 0.8.pow(numOfCards)) {
@@ -49,6 +73,11 @@ interface Player {
         return b
     }
 
+    /**
+     * The gameplay procedure that is executed on each player. In each round of the game,
+     * a player goes through five phases including Preparation phase, Draw phase,
+     * Judgement Phase, Play phase, Discard Phase, and Final phase.
+     */
     fun templateMethod() {
         preparationPhase()
         drawPhase()
@@ -72,7 +101,10 @@ interface Player {
         if(hasAttackCard()) {
             val enemy: Player = identity.whomToAttack(GeneralManager.getGeneralList())
             println("$name spends a card to attack a ${enemy.identity}, ${enemy.name}")
-            enemy.beingAttacked()
+            val attackResult = enemy.beingAttacked()
+            if(enemy.identity is LordStrategy) {
+                (enemy.identity as Subject).notifyObservers(attackResult)
+            }
             numOfCards--
         }
         println("$name has $numOfCards card(s), current HP is $currentHP.")
@@ -97,6 +129,7 @@ abstract class General: Player {
     override var currentHP: Int = 0
     override var numOfCards: Int = 4
     override var flag: Boolean = true
+
 
 }
 
@@ -124,14 +157,14 @@ object GeneralManager {
         return list.toList()
     }
 
-    fun createGenerals(lords: Int, nonLords: Int) {
+    fun createGenerals(numOfLords: Int, numOfNonLords: Int) {
         val lordFactory = LordFactory()
-        for(i in 1..lords) {
+        for(i in 1..numOfLords) {
             addGeneral(lordFactory.createRandomGeneral())
         }
 
-        val nonLordFactory = NonLordFactory(list[0] as? WeiGeneral, lords+nonLords)
-        for(i in 1..nonLords) {
+        val nonLordFactory = NonLordFactory(list[0] as? WeiGeneral, numOfLords+numOfNonLords)
+        for(i in 1..numOfNonLords) {
             addGeneral(nonLordFactory.createRandomGeneral())
         }
     }
@@ -220,6 +253,9 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?, numOfParticipants: Int
         val nonLordGeneral = listOfGenerals.random()
         listOfGenerals.remove(nonLordGeneral)
         nonLordGeneral.currentHP = nonLordGeneral.maxHP
+
+        val listOfGen = GeneralManager.getGeneralList()
+        val subject = listOfGen[0].identity as? Subject ?: error("failed to convert to subject")
         if(numOfLoyalists > 0) {
             nonLordGeneral.identity = LoyalistStrategy()
             numOfLoyalists--
@@ -229,6 +265,8 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?, numOfParticipants: Int
         } else if(numOfSpies > 0) {
             nonLordGeneral.identity = SpyStrategy()
             numOfSpies--
+            // Let every spy become an observer to the lord
+            subject.attachObserver(nonLordGeneral.identity as Observer)
         } else {
             throw RuntimeException("Failed to create more generals.")
         }
