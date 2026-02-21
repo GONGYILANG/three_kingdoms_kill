@@ -109,9 +109,7 @@ interface Player {
         else
             println("$name doesn't have attack card.")
         println("$name has $numOfCards card(s), current HP is $currentHP.")
-        if(currentHP == 0) {
-            GeneralManager.removeGeneral(this as General)
-        }
+
     }
     fun discardPhase() {
         val l = listOf(1, 2, 3)
@@ -291,10 +289,10 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?, numOfParticipants: Int
 
 fun main() {
     GeneralManager
-    GeneralManager.createGenerals(1, 5)
+    GeneralManager.createGenerals(1, 3)
     val listOfGen: List<Player> = GeneralManager.getGeneralList()
     if(listOfGen[0] is WeiGeneral) {
-        val factory = NonLordFactory(listOfGen[0] as WeiGeneral, 6)
+        val factory = NonLordFactory(listOfGen[0] as WeiGeneral, 4)
         for (i in 1 until listOfGen.size) {
             if (listOfGen[i] is WeiGeneral)
                 factory.addToWeiChain(listOfGen[i] as WeiGeneral)
@@ -303,6 +301,8 @@ fun main() {
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of players: $size\n")
+    GeneralManager.gameStart()
+    println()
     GeneralManager.gameStart()
 
 }

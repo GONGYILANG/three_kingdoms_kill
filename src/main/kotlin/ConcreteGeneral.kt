@@ -11,15 +11,9 @@ class LiuBei: General() {
     override fun playPhase() {
         val currentState: State = (identity as LiuBeiStrategy).state
         val beforeHP: Int = currentHP
-        if(currentState is HealthyState) {
-            currentState.playNextCard(this)
+        currentState.playNextCard(this)
+        if(currentHP == beforeHP)
             super.playPhase()
-        }
-        else {
-            currentState.playNextCard(this)
-            if(currentHP == beforeHP)
-                super.playPhase()
-        }
     }
 
     override fun finalPhase() {
