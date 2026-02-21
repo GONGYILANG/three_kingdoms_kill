@@ -8,11 +8,11 @@ interface Observer {
     fun update(result: Boolean)
 }
 
-abstract class Strategy {
+abstract class Strategy(protected val owner: General) {
     abstract fun whomToAttack(listOfPlayers: List<Player>): Player
 }
 
-class LordStrategy: Strategy(), Subject {
+open class LordStrategy(owner: General): Strategy(owner), Subject {
     private val observers: MutableList<Observer> = mutableListOf()
 
     override fun whomToAttack(listOfPlayers: List<Player>): Player {
@@ -45,7 +45,15 @@ class LordStrategy: Strategy(), Subject {
     }
 }
 
-class LoyalistStrategy: Strategy() {
+class LiuBeiStrategy(owner: General): LordStrategy(owner) {
+    lateinit var state: State
+
+    fun playNextCard() {
+        state.playNextCard(owner)
+    }
+}
+
+class LoyalistStrategy(owner: General): Strategy(owner) {
     override fun whomToAttack(listOfPlayers: List<Player>): Player {
         lateinit var player: Player
         for(p in listOfPlayers) {
@@ -62,13 +70,8 @@ class LoyalistStrategy: Strategy() {
     }
 }
 
-class SpyStrategy: Strategy(), Observer {
+class SpyStrategy(owner: General): Strategy(owner), Observer {
     private var risk: Double = 50.0
-    private var ownerName: String = "Spy"
-
-    fun bindOwnerName(name: String) {
-        ownerName = name
-    }
 
     override fun whomToAttack(listOfPlayers: List<Player>): Player {
         lateinit var player: Player
@@ -90,7 +93,7 @@ class SpyStrategy: Strategy(), Observer {
         else
             // if the lord can't dodge the attack, the risk level increases to 1.5 of the original value
             risk *= 1.5
-        println("$ownerName on Lord's Risk Level: $risk")
+        println("${owner.name} on Lord's Risk Level: $risk")
     }
 
     override fun toString(): String {
@@ -98,7 +101,7 @@ class SpyStrategy: Strategy(), Observer {
     }
 }
 
-class RebelStrategy: Strategy() {
+class RebelStrategy(owner: General): Strategy(owner) {
     override fun whomToAttack(listOfPlayers: List<Player>): Player {
         lateinit var player: Player
         for(p in listOfPlayers) {

@@ -1,4 +1,3 @@
-import GeneralManager.list
 import kotlin.math.pow
 import kotlin.random.Random
 
@@ -107,6 +106,8 @@ interface Player {
             }
             numOfCards--
         }
+        else
+            println("$name doesn't have attack card.")
         println("$name has $numOfCards card(s), current HP is $currentHP.")
         if(currentHP == 0) {
             GeneralManager.removeGeneral(this as General)
@@ -207,8 +208,17 @@ class LordFactory: GeneralFactory() {
         val lordGeneral = listOfGenerals.random()
         listOfGenerals.remove(lordGeneral)
         lordGeneral.maxHP++
-        lordGeneral.currentHP = lordGeneral.maxHP
-        lordGeneral.identity = LordStrategy()
+        if(lordGeneral is LiuBei)
+            lordGeneral.currentHP = 1
+        else
+            lordGeneral.currentHP = lordGeneral.maxHP
+        if(lordGeneral is LiuBei) {
+            val liuBeiStrategy = LiuBeiStrategy(lordGeneral)
+            liuBeiStrategy.state = HealthyState()
+            lordGeneral.identity = liuBeiStrategy
+        }
+        else
+            lordGeneral.identity = LordStrategy(lordGeneral)
 
         println("General ${lordGeneral.name} created.")
         println("${lordGeneral.name}, a lord, has ${lordGeneral.currentHP} health point(s).")
@@ -257,14 +267,13 @@ class NonLordFactory(private var weiGeneral: WeiGeneral?, numOfParticipants: Int
         val listOfGen = GeneralManager.getGeneralList()
         val subject = listOfGen[0].identity as? Subject ?: error("failed to convert to subject")
         if(numOfLoyalists > 0) {
-            nonLordGeneral.identity = LoyalistStrategy()
+            nonLordGeneral.identity = LoyalistStrategy(nonLordGeneral)
             numOfLoyalists--
         } else if(numOfRebels > 0) {
-            nonLordGeneral.identity = RebelStrategy()
+            nonLordGeneral.identity = RebelStrategy(nonLordGeneral)
             numOfRebels--
         } else if(numOfSpies > 0) {
-            val spyStrategy = SpyStrategy()
-            spyStrategy.bindOwnerName(nonLordGeneral.name)
+            val spyStrategy = SpyStrategy(nonLordGeneral)
             nonLordGeneral.identity = spyStrategy
             numOfSpies--
             // Let every spy become an observer to the lord

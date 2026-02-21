@@ -3,11 +3,29 @@ class LiuBei: General() {
     override var maxHP = 4
     override lateinit var identity: Strategy
     override fun preparationPhase() {
+        if(currentHP == 1) {
+            (identity as LiuBeiStrategy).state = UnhealthyState()
+        }
+    }
 
+    override fun playPhase() {
+        val currentState: State = (identity as LiuBeiStrategy).state
+        val beforeHP: Int = currentHP
+        if(currentState is HealthyState) {
+            currentState.playNextCard(this)
+            super.playPhase()
+        }
+        else {
+            currentState.playNextCard(this)
+            if(currentHP == beforeHP)
+                super.playPhase()
+        }
     }
 
     override fun finalPhase() {
-
+        if(currentHP > 1) {
+            (identity as LiuBeiStrategy).state = HealthyState()
+        }
     }
 
 }
