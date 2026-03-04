@@ -112,12 +112,11 @@ interface Player {
 
     }
     fun discardPhase() {
-        val l = listOf(1, 2, 3)
-        val numOfDiscard = l.random()
-        if(numOfDiscard > numOfCards)
-            numOfCards = 0
-        else
+        var numOfDiscard = 0
+        if(numOfCards > currentHP) {
+            numOfDiscard = numOfCards - currentHP
             numOfCards -= numOfDiscard
+        }
         println("$name discards $numOfDiscard card(s), now has $numOfCards card(s).")
 
     }
@@ -179,7 +178,7 @@ object GeneralManager {
         for (i in 0 until list.size) {
             if(i == 3)
                 // Place the Acedia spell card to the fourth player
-                Acedia(list[i]).execute()
+                acedia(list[i]).invoke()
             list[i].templateMethod()
         }
 
