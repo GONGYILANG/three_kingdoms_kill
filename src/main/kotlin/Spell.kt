@@ -1,20 +1,21 @@
 import kotlin.random.Random
 
-//interface Spell {
-//    fun execute()
-//}
+interface Spell: Card {
+    val target: Player
+    fun execute()
+}
 
-typealias Spell = () -> Unit
-typealias SpellGenerator = (Player) -> Spell
+class Acedia(override val suit: String, override val number: Int): Spell {
+    override val name: String = "Acedia"
+    override lateinit var target: Player
 
-val acedia: SpellGenerator = { player: Player ->
-    {
+    override fun execute() {
+        println("Judging $name over ${target.name}...")
         if (Random.nextDouble() >= 0.25) {
-            println("${player.name} can't dodge the Acedia card. Skipping one round of Play Phase.")
-            player.flag = false
+            println("${target.name} can't dodge the Acedia card. Skipping one round of Play Phase.")
+            target.skipPlayPhase = true
         } else {
-            println("${player.name} dodged the Acedia card.")
-            player.flag = true
+            println("${target.name} dodged the Acedia card.")
         }
     }
 }

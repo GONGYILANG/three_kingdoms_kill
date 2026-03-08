@@ -10,9 +10,12 @@ interface Player {
             println("Setting current HP to $value")
         }
     var numOfCards: Int
-    var flag: Boolean  // a boolean variable used in the judgement phase,
-    // if flag is true then skip the play phase for one round, otherwise the play phase proceeds
+    var skipDrawPhase: Boolean
+    var skipPlayPhase: Boolean
     var identity: Strategy
+    var judgementZone: MutableList<Spell>  // a list of time-delayed spells to take effects
+    // a map of equipments, the key is an equipment's category, the value is the equipment
+    val equipmentZone: MutableMap<EquipmentSlot, Equipment>
 
     /**
      * Procedure of a player being attacked by another player.
@@ -21,6 +24,14 @@ interface Player {
      */
     fun beingAttacked(): Boolean {
         println("$name is being attacked.")
+        // 1. First check if the equipment zone has any armor
+        val armor = equipmentZone[EquipmentSlot.ARMOR]
+        if (armor != null) {
+            // return true if the armor cancels the attack successfully
+            if (armor.onBeingAttacked(this)) return true
+        }
+
+        // 2. If no armor in the equipment zone, enter the normal dodge logic
         return dodgeAttack()
     }
 
@@ -49,7 +60,7 @@ interface Player {
             // consume one dodge card to dodge the attack
             numOfCards--
             println("$name dodged attack by spending a dodge card.")
-            println("$name has $numOfCards of card(s) after dodging the attack.")
+            println("$name has $numOfCards card(s) after dodging the attack.")
         }
         else {
             currentHP--
@@ -72,34 +83,83 @@ interface Player {
         return b
     }
 
+    fun templateMethod()
+
+}
+
+abstract class General: Player {
+    override var currentHP: Int = 0
+    override var numOfCards: Int = 4
+    override var judgementZone: MutableList<Spell> = mutableListOf()
+    override var equipmentZone: MutableMap<EquipmentSlot, Equipment> = mutableMapOf()
+    override var skipDrawPhase: Boolean = false
+    override var skipPlayPhase: Boolean = false
+
     /**
      * The gameplay procedure that is executed on each player. In each round of the game,
      * a player goes through five phases including Preparation phase, Draw phase,
      * Judgement Phase, Play phase, Discard Phase, and Final phase.
      */
-    fun templateMethod() {
+    override fun templateMethod() {
+        println("--------- ${name}'s round begins ---------")
+
+        skipDrawPhase = false
+        skipPlayPhase = false
         preparationPhase()
-        drawPhase()
-        if(judgementPhase()) {
-            playPhase()
+
+        judgementPhase()
+
+        if (!skipDrawPhase) {
+            drawPhase()
+        } else {
+            println("$name's draw phase has been skipped.")
         }
+
+        if (!skipPlayPhase) {
+            playPhase()
+        } else {
+            println("$name's play phase has been skipped.")
+        }
+
         discardPhase()
+
         finalPhase()
+
+        println("--------- ${name}'s round ends ---------\n")
     }
 
-    // component methods invoked at a player's turn
-    fun preparationPhase()
-    fun judgementPhase(): Boolean {
-        return flag
+    open fun preparationPhase() {
+
     }
-    fun drawPhase() {
+
+    open fun judgementPhase() {
+        if (judgementZone.isEmpty()) return
+
+        println("$name enters the judgement phase," +
+                " and there are ${judgementZone.size} card(s) in the judgement zone.")
+
+        // 重要：判定顺序是“后发先至”(LIFO)，所以从列表末尾开始遍历
+        val iterator = judgementZone.asReversed().iterator()
+        while (iterator.hasNext()) {
+            val spell = iterator.next()
+
+            // 执行判定（Spell 内部会修改 player 的 skip 开关）
+            // 建议：execute 方法可以传入一个 Deck 对象来抽取真实的判定牌
+            spell.execute()
+
+            iterator.remove()
+        }
+    }
+
+    open fun drawPhase() {
         numOfCards += 2
         println("$name draws 2 cards and now has $numOfCards card(s).")
     }
-    fun playPhase() {
+
+    open fun playPhase() {
         if(hasAttackCard()) {
             val enemy: Player = identity.whomToAttack(GeneralManager.getGeneralList())
-            println("$name spends a card to attack a ${enemy.identity}, ${enemy.name}")
+            println("$name spends a card to attack a ${enemy.identity}, ${enemy.name}.")
             val attackResult = enemy.beingAttacked()
             if(enemy.identity is LordStrategy) {
                 (enemy.identity as Subject).notifyObservers(attackResult)
@@ -109,26 +169,20 @@ interface Player {
         else
             println("$name doesn't have attack card.")
         println("$name has $numOfCards card(s), current HP is $currentHP.")
-
     }
-    fun discardPhase() {
+
+    open fun discardPhase() {
         var numOfDiscard = 0
         if(numOfCards > currentHP) {
             numOfDiscard = numOfCards - currentHP
             numOfCards -= numOfDiscard
         }
         println("$name discards $numOfDiscard card(s), now has $numOfCards card(s).")
+    }
+
+    open fun finalPhase() {
 
     }
-    fun finalPhase()
-}
-
-abstract class General: Player {
-    override var currentHP: Int = 0
-    override var numOfCards: Int = 4
-    override var flag: Boolean = true
-
-
 }
 
 object GeneralManager {
@@ -167,25 +221,32 @@ object GeneralManager {
         }
     }
 
-    // equip a player with an equipment
-    fun equip(index: Int, equipment: (Player) -> Equipment): Player {
-        list[index] = equipment(list[index])
-        return list[index]
+    /**
+     * Equip a player with a piece of equipment
+     * @param playerList: a list of players that aren't out
+     * @param targetIndex: the index of the player to be equipped
+     * @param equipment: the equipment
+     */
+    fun equip(playerList: MutableList<Player>, targetIndex: Int, equipment: Equipment) {
+        val targetPlayer = playerList[targetIndex]
+        // val eightTrigrams = EightTrigrams("Spade", 2)
+        targetPlayer.equipmentZone[equipment.slot] = equipment
+        println("${targetPlayer.name} has been equipped with ${equipment.name}.")
     }
 
     fun gameStart() {
+        equip(list, 0, EightTrigrams("Spade", 2))
+        val acedia = Acedia("Heart", 2)
+        acedia.target = list[3]
+        list[3].judgementZone.add(0, acedia)
         println("${list[3].name} being placed the Acedia card.")
-        for (i in 0 until list.size) {
-            if(i == 3)
-                // Place the Acedia spell card to the fourth player
-                acedia(list[i]).invoke()
-            list[i].templateMethod()
+        for(r in 0..1) {
+            for(i in 0 until list.size) {
+                list[i].templateMethod()
+            }
+            println()
         }
 
-        // testing the Eight Trigrams card on the first general in the general list
-//        println()
-//        equip(0, ::EightTrigrams)
-//        list[0].beingAttacked()
     }
 
 }
@@ -300,8 +361,6 @@ fun main() {
 
     val size = GeneralManager.getGeneralCount()
     println("Total number of players: $size\n")
-    GeneralManager.gameStart()
-    println()
     GeneralManager.gameStart()
 
 }

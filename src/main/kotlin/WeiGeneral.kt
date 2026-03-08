@@ -19,14 +19,6 @@ abstract class WeiGeneral: General() {
         }
         return result
     }
-
-    override fun beingAttacked(): Boolean {
-        println("$name is being attacked.")
-        return if(this is CaoCao)
-            handleRequest()
-        else
-            dodgeAttack()
-    }
 }
 
 class CaoCao: WeiGeneral() {
@@ -35,23 +27,28 @@ class CaoCao: WeiGeneral() {
     override var next: WeiGeneral? = null
     override lateinit var identity: Strategy
 
-    override fun preparationPhase() {
+    /**
+     * Override the dodge logic for Cao Cao, first check if Entourage succeeds before using Dodge
+     */
+    override fun dodgeAttack(): Boolean {
+        // 1. try to trigger Entourage
+        println("[Entourage] $name activates Lord Skill Entourage.")
+        val entourageResult = handleNextRequest()
 
-    }
+        if (entourageResult) {
+            println("$name successfully dodged the attack with Entourage.")
+            return true
+        }
 
-    override fun finalPhase() {
-
+        // 2. Entourage fails, call the dodgeAttack() method in Player
+        println("Entourage failed, $name tries to dodge the attack with [Dodge].")
+        return super.dodgeAttack()
     }
 
     override fun handleRequest(): Boolean {
-        println("[Entourage] $name activates Lord Skill Entourage.")
-        val result = handleNextRequest()  // whether another Wei general dodged the attack for Cao Cao
-        // if all Wei generals in the Wei chain failed to dodge the attack, Cao Cao dodges it by himself
-        var dodgeResult = false
-        if(!result)
-            dodgeResult = dodgeAttack()
-        return result || dodgeResult
+        return handleNextRequest()
     }
+
 }
 
 class SimaYi: WeiGeneral() {
@@ -59,14 +56,6 @@ class SimaYi: WeiGeneral() {
     override var maxHP = 3
     override var next: WeiGeneral? = null
     override lateinit var identity: Strategy
-
-    override fun preparationPhase() {
-
-    }
-
-    override fun finalPhase() {
-
-    }
 
     override fun handleRequest(): Boolean {
         return handleNextRequest()
@@ -79,14 +68,6 @@ class ZhenJi: WeiGeneral() {
     override var next: WeiGeneral? = null
     override lateinit var identity: Strategy
 
-    override fun preparationPhase() {
-
-    }
-
-    override fun finalPhase() {
-
-    }
-
     override fun handleRequest(): Boolean {
         return handleNextRequest()
     }
@@ -98,14 +79,6 @@ class XiahouDun: WeiGeneral() {
     override var next: WeiGeneral? = null
     override lateinit var identity: Strategy
 
-    override fun preparationPhase() {
-
-    }
-
-    override fun finalPhase() {
-
-    }
-
     override fun handleRequest(): Boolean {
         return handleNextRequest()
     }
@@ -116,14 +89,6 @@ class GuoJia: WeiGeneral() {
     override var maxHP = 4
     override var next: WeiGeneral? = null
     override lateinit var identity: Strategy
-
-    override fun preparationPhase() {
-
-    }
-
-    override fun finalPhase() {
-
-    }
 
     override fun handleRequest(): Boolean {
         return handleNextRequest()
